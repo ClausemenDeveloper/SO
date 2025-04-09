@@ -54,7 +54,57 @@ void print_results(Process processes[], int n) {
     printf("\nAverage Turnaround Time: %.2f\n", total_turnaround / n);
     printf("Average Waiting Time: %.2f\n", total_waiting / n);
 }
+/**
+ * Função para calcular estatísticas relacionadas aos processos.
+ * 
+ * @param processes Array de estruturas de processos contendo informações sobre cada processo.
+ * @param n Número total de processos no array.
+ * 
+ * Esta função calcula as seguintes estatísticas:
+ * - Tempo médio de espera (Average Waiting Time).
+ * - Tempo médio de retorno (Average Turnaround Time).
+ * - Utilização da CPU (CPU Utilization).
+ * - Taxa de transferência (Throughput), ou seja, número de processos concluídos por unidade de tempo.
+ * - Número de prazos perdidos (Dead Line Misses) em algoritmos de tempo real.
+ */
+void calculate_statistics(Process processes[], int n) {
+    double total_turnaround = 0, total_waiting = 0, total_idle_time = 0;
+    double throughput, cpu_utilization;
+    int deadline_misses = 0;
+    double simulation_time = processes[n - 1].finish_time;
 
+    // Calcula o tempo total de turnaround e espera
+    for (int i = 0; i < n; i++) {
+        total_turnaround += processes[i].turnaround_time;
+        total_waiting += processes[i].waiting_time;
+
+        // Verifica se o processo perdeu o prazo (exemplo: prazo arbitrário de 10 unidades de tempo)
+        if (processes[i].finish_time > processes[i].arrival_time + 10) {
+            deadline_misses++;
+        }
+    }
+
+    // Calcula o tempo ocioso total da CPU
+    for (int i = 1; i < n; i++) {
+        if (processes[i].arrival_time > processes[i - 1].finish_time) {
+            total_idle_time += processes[i].arrival_time - processes[i - 1].finish_time;
+        }
+    }
+
+    // Calcula a utilização da CPU
+    cpu_utilization = ((simulation_time - total_idle_time) / simulation_time) * 100;
+
+    // Calcula o throughput (número de processos concluídos por unidade de tempo)
+    throughput = n / simulation_time;
+
+    // Exibe as estatísticas
+    printf("\nEstatísticas:\n");
+    printf("Tempo médio de Turnaround: %.2f\n", total_turnaround / n);
+    printf("Tempo médio de Espera: %.2f\n", total_waiting / n);
+    printf("Utilização da CPU: %.2f%%\n", cpu_utilization);
+    printf("Throughput: %.2f processos por unidade de tempo\n", throughput);
+    printf("Perdas de Prazo: %d\n", deadline_misses);
+}
 int main() {
     Process processes[MAX_PROCESSES];
     int n;
@@ -63,5 +113,6 @@ int main() {
     generate_processes(processes, n);
     fcfs(processes, n);
     print_results(processes, n);
+    calculate_statistics(processes, n); //chamada para exibir as estatísticas
     return 0;
 }
