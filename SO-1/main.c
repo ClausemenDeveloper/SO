@@ -6,6 +6,7 @@
 #include <stdbool.h>
 #include "algoritmos.h"
 
+
 // Função principal
 int main() {
     srand(time(NULL)); // Seed the random number generator
